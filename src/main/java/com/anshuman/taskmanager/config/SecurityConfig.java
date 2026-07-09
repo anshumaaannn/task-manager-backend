@@ -35,11 +35,18 @@ public class SecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http.csrf(csrf -> csrf.disable());
             http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-            http.authorizeHttpRequests(auth -> auth.requestMatchers(
-                    "/v3/api-docs/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html"
-            ).permitAll().requestMatchers(HttpMethod.POST,"/auth/register","/auth/login").permitAll().anyRequest().authenticated());
+            http.authorizeHttpRequests(auth -> auth
+        .requestMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/error"
+        ).permitAll()
+        .requestMatchers(HttpMethod.POST,
+                "/auth/register",
+                "/auth/login")
+        .permitAll()
+        .anyRequest().authenticated());
             http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
             return http.build();
         }
