@@ -20,7 +20,7 @@ public class AuthController {
     }
     @PostMapping("/register")
     public UserResponse register(@RequestBody RegisterRequest request){
-
+        System.out.println("REGISTER API HIT");
         return authService.register(request);
     }
 
