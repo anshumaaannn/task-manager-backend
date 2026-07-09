@@ -1,10 +1,14 @@
 package com.anshuman.taskmanager.service;
 
+import com.anshuman.taskmanager.Util.JwtUtil;
+import com.anshuman.taskmanager.dto.AuthResponse;
 import com.anshuman.taskmanager.dto.LoginRequest;
 import com.anshuman.taskmanager.dto.RegisterRequest;
 import com.anshuman.taskmanager.dto.UserResponse;
 import com.anshuman.taskmanager.entity.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.anshuman.taskmanager.repository.UserRepository;
 
@@ -15,11 +19,13 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder , JwtUtil jwtUtil) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -46,22 +52,16 @@ public class AuthService {
 
         return response;
     }
-    public UserResponse login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
         if (!existingUser.isPresent()) {
-            throw new RuntimeException("Wrong email or password");
+            throw new UsernameNotFoundException("User  not found");
         }
         boolean matches = passwordEncoder.matches(request.getPassword(), existingUser.get().getPassword());
-        System.out.println("Email entered: " + request.getEmail());
-
-        System.out.println("Password entered: " + request.getPassword());
-
-        System.out.println("Stored hash: " + existingUser.get().getPassword());
-
-        System.out.println("Matches: " + matches);
         if(matches == false) {
             throw new RuntimeException("Wrong email or password");
         }
+        String token = jwtUtil.generateToken(request.getEmail());
 
         UserResponse response = new UserResponse();
         response.setId(existingUser.get().getId());
@@ -69,6 +69,9 @@ public class AuthService {
         response.setRole(existingUser.get().getRole());
         response.setName(existingUser.get().getName());
 
-        return response;
+        return new AuthResponse(token);
     }
+
+
 }
+

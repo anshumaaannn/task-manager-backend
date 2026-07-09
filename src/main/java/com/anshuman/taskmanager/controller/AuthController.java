@@ -1,5 +1,6 @@
 package com.anshuman.taskmanager.controller;
 
+import com.anshuman.taskmanager.dto.AuthResponse;
 import com.anshuman.taskmanager.dto.LoginRequest;
 import com.anshuman.taskmanager.dto.RegisterRequest;
 import com.anshuman.taskmanager.dto.UserResponse;
@@ -22,8 +23,9 @@ public class AuthController {
 
         return authService.register(request);
     }
+
     @PostMapping("/login")
-    public UserResponse login(@RequestBody LoginRequest request){
+    public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
     }
 }
